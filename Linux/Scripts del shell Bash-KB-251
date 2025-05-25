@@ -1,0 +1,66 @@
+AWS Bash Shell Scripting Lab: Automated Folder Backup
+
+This repository contains materials for a lab focused on creating and executing Bash shell scripts on an Amazon Linux EC2 instance to automate folder backups. This lab demonstrates fundamental Linux command-line operations and basic shell scripting for DevOps practices.
+
+---
+
+**Objectives:**
+* Connect securely to an Amazon Linux EC2 instance using SSH.
+* Develop a Bash script to automate the backup of a specified folder (`CompanyA`).
+* Compress the backup into a `.tar.gz` archive with a dynamic filename based on the current date and time.
+
+---
+**Functions/Commands Used and Their Purpose:**
+
+The lab utilizes several standard Linux commands and Bash scripting constructs. Below are the key functions/commands, their purpose, and the expected results within the script or lab context:
+
+* `pwd`
+    * **Purpose:** Prints the name of the current working directory. Used to verify the user is in the home folder.
+    * **Result Given:** `/home/ec2-user/`
+* `touch backup.sh`
+    * **Purpose:** Creates a new, empty file named `backup.sh`. This is the first step in creating the script file.
+    * **Result Given:** An empty `backup.sh` file is created in the current directory.
+* `sudo chmod 755 backup.sh`
+    * **Purpose:** Changes the file permissions of `backup.sh` to make it executable. `sudo` grants superuser privileges for this action.
+        * `755` permissions: Read, write, and execute for the owner; read and execute for the group and others.
+    * **Result Given:** The `backup.sh` script becomes executable by the user.
+* `vi backup.sh`
+    * **Purpose:** Opens the `backup.sh` file using the `vi` text editor for editing.
+    * **Result Given:** The `vi` editor interface appears, allowing the user to insert and modify script content.
+* `#!/bin/bash` (Shebang line)
+    * **Purpose:** This is a special line at the beginning of a script that tells the operating system which interpreter to use for executing the script (in this case, Bash).
+    * **Result Given:** Ensures the script is run by the Bash shell.
+* `DAY="$(date +%Y_%m_%d)"`
+    * **Purpose:** Defines a Bash variable named `DAY`. The `$(...)` performs command substitution, executing the `date +%Y_%m_%d` command and capturing its output. The `date` command formats the current date as YYYY_MM_DD (e.g., `2022_05_18`).
+    * **Result Given:** The `DAY` variable holds the current date in the specified format.
+* `BACKUP="/home/$USER/backups/$DAY-backup-CompanyA.tar.gz"`
+    * **Purpose:** Defines a Bash variable named `BACKUP`. This variable constructs the full path and filename for the backup archive. `$USER` is a shell variable that automatically holds the current user's username (e.g., `ec2-user`).
+    * **Result Given:** The `BACKUP` variable holds the complete path and name for the compressed backup file (e.g., `/home/ec2-user/backups/2022_05_18-backup-CompanyA.tar.gz`).
+* `tar -csvpzf $BACKUP /home/$USER/CompanyA`
+    * **Purpose:** This is the core command for creating the compressed archive.
+        * `tar`: The archiving utility.
+        * `-c`: Create a new archive.
+        * `-s`: Append suffix to member names (used here to remove leading '/').
+        * `-v`: Verbose output (lists files as they are processed).
+        * `-p`: Preserve file permissions.
+        * `-z`: Compress the archive using gzip.
+        * `-f $BACKUP`: Specifies the name of the archive file, using the value stored in the `BACKUP` variable.
+        * `/home/$USER/CompanyA`: The source directory to be archived.
+    * **Result Given:** The `CompanyA` directory and its contents are compressed into a `.tar.gz` file at the specified `BACKUP` path. The command outputs a list of files being added to the archive (e.g., `tar: Removing leading '/' from member names /home/ec2-user/CompanyA/...`).
+* `./backup.sh`
+    * **Purpose:** Executes the `backup.sh` script located in the current directory. The `./` indicates the current directory.
+    * **Result Given:** The script runs, and the `tar` command's output is displayed on the console as it creates the backup.
+* `ls backups/`
+    * **Purpose:** Lists the contents of the `backups/` directory. Used to verify that the archive file has been successfully created.
+    * **Result Given:** The name of the newly created backup archive file is displayed (e.g., `2022_05_18_05:55:28_05_55-backup-CompanyA.tar.gz`).
+
+---
+
+**Lab Outcome:**
+
+Upon successful completion of this lab, users will have a working Bash script that automates the backup of a specific folder, naming the archive dynamically with a timestamp. This demonstrates a practical application of shell scripting for system administration and preparatory steps for more advanced CI/CD automation and disaster recovery strategies. The script can be further integrated with scheduling tools like `cron` or used for transferring backups to other storage locations.
+
+
+
+
+
