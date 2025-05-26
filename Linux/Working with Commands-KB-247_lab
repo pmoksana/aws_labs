@@ -1,0 +1,102 @@
+
+# Linux Command Line Essentials: Mastering Core Utilities
+
+This repository outlines key Linux command-line utilities for system interaction, data manipulation, and file management.
+It covers foundational commands like `cd`, `chmod`, `ssh`, and utilities such as `tee`, `sort`, `grep`, `cut`, and `sed`, providing practical examples for each.
+
+### Commands Used and Their Purpose
+
+This section details the specific commands demonstrated in the lab, explaining their function and how they are applied.
+
+### 1. Connecting to an EC2 Instance via SSH
+
+Connecting to a remote Linux server (like an AWS EC2 instance) is a fundamental skill.
+
+* **`cd ~/Downloads`**
+    * **Purpose:** `cd` (change directory) is used to navigate the file system. `~/Downloads` refers to the 'Downloads' subdirectory within your user's home directory. This command changes the current working directory to where the SSH key file is typically saved.
+* **`chmod 400 labsuser.pem`**
+    * **Purpose:** `chmod` (change mode) modifies file permissions. `400` sets read-only permissions for the file's owner, and no permissions for anyone else. This is a crucial security step for SSH private key files (`.pem`) as SSH clients require strict permissions for security reasons.
+* **`ssh -i labsuser.pem ec2-user@<public-ip>`**
+    * **Purpose:** `ssh` (Secure Shell) is a network protocol for secure remote login.
+        * `-i labsuser.pem`: Specifies the identity file (your private key) to use for authentication.
+        * `ec2-user`: This is the default username for Amazon Linux EC2 instances.
+        * `@<public-ip>`: The `@` symbol separates the username from the host (your EC2 instance's public IP address). This specifies the target server to connect to.
+    * **Usage Example (with placeholder replaced):** `ssh -i labsuser.pem ec2-user@34.219.171.149`
+
+### 2. Using the `tee` Command
+
+The `tee` command reads standard input and writes it to both standard output (the screen) and one or more files.
+
+* **`pwd`**
+    * **Purpose:** `pwd` (print working directory) displays the full path of the current directory you are in. It's used here to confirm you are in the `/home/ec2-user` folder.
+* **`hostname | tee file1.txt`**
+    * **Purpose:** This command demonstrates the `tee` utility.
+        * `hostname`: Prints the hostname of the system.
+        * `|` (pipe): This operator takes the standard output of the command on its left (`hostname`) and feeds it as standard input to the command on its right (`tee`).
+        * `tee file1.txt`: Receives the hostname as input, then prints it to the screen (standard output) AND writes it to `file1.txt`.
+* **`ls`**
+    * **Purpose:** `ls` (list) displays the contents of the current directory. It's used to verify that `file1.txt` was successfully created by `tee`.
+
+
+### 3. Using `sort` and the Pipe Operator
+
+This section explores `sort` for reordering data and the power of the pipe operator for combining commands.
+
+* **`cat > test.csv`**
+    * **Purpose:** `cat` (concatenate) is typically used to display file content, but when combined with `>` (redirection), it creates or overwrites a file. In this case, `cat > test.csv` takes all subsequent lines typed in the terminal as input and writes them into `test.csv` until `CTRL+D` is pressed.
+    * **Content Input Example:**
+        ```
+        Factory, 1, Paris
+        Store, 2, Dubai
+        Factory, 3, Brasilia
+        Store, 4, Algiers
+        Factory, 5, Tokyo
+        ```
+* **`sort test.csv`**
+    * **Purpose:** `sort` reorders lines of text files. When used without options, it sorts lines alphabetically and then numerically by default. This command sorts the content of `test.csv`.
+* **`grep Paris test.csv`** (Correction to lab's `find | grep Paris test.csv` based on expected output)
+    * **Purpose:** `grep` (global regular expression print) searches for patterns in files.
+        * `Paris`: The pattern being searched for.
+        * `test.csv`: The file to search within.
+    * **Functionality:** This command searches the `test.csv` file for any lines containing the string "Paris" and prints only those matching lines to the screen. The lab's original text had a slightly misformed `find` command; `grep` directly on the file is the standard way to achieve this specific search.
+
+### 4. Using the `cut` Command
+
+The `cut` command extracts sections from each line of files based on characters, bytes, or fields.
+
+* **`cat > cities.csv`**
+    * **Purpose:** Similar to `cat > test.csv`, this creates a new file `cities.csv` by taking input directly from the terminal until `CTRL+D` is pressed.
+    * **Content Input Example:**
+        ```
+        Dallas, Texas
+        Seattle, Washington
+        Los Angeles, California
+        Atlanta, Georgia
+        New York, New York
+        ```
+* **`cut -d ',' -f 1 cities.csv`**
+    * **Purpose:** `cut` extracts specific parts of lines.
+        * `-d ','`: Specifies that the comma (`,`) should be used as the delimiter (separator) between fields.
+        * `-f 1`: Specifies that the first field (the section before the first delimiter) should be extracted.
+        * `cities.csv`: The input file to process.
+    * **Functionality:** This command processes each line in `cities.csv`, splits it by the comma, and prints only the first part (the city name).
+
+### Additional Challenge: Using `sed`
+
+The `sed` (stream editor) command is a powerful tool for parsing and transforming text.
+
+* **`sed 's/word being replaced/replacement word/' file name`**
+    * **Purpose:** This is the basic syntax for `sed`'s substitution command.
+        * `s`: The substitution command.
+        * `/`: Delimiter used for the pattern and replacement strings.
+        * `word being replaced`: The regular expression pattern to search for.
+        * `replacement word`: The string to replace the matched pattern with.
+        * `file name`: The input file `sed` will process.
+    * **Functionality:** `sed` reads the file line by line, searches for the "word being replaced," and replaces the first occurrence on each line with the "replacement word," then prints the modified line to standard output.
+* **Challenge Task:** Use `sed` to replace the first comma (`,`) with periods (`.`) in `cities.csv` and `test.csv`.
+    * **Suggested Command:**
+        ```bash
+        sed 's/,/./' cities.csv
+        sed 's/,/./' test.csv
+        ```
+        * **Explanation:** `s/,/./` tells `sed` to substitute the first comma it finds on each line with a period. By default, `sed` prints to standard output; to modify the file in place, you would typically use `sed -i 's/,/./' filename`. The lab's output shows the result, implying direct output.
