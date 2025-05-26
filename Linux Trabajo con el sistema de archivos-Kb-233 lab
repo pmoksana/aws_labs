@@ -1,0 +1,113 @@
+Working with the File System
+# Linux Fundamentals: Working with the File System
+
+
+### Objectives
+
+In this lab, i learned to:
+
+* **Create** complex folder structures.
+* **Generate** new files.
+* **Copy** files and directories to new locations.
+* **Move/Rename** files and directories.
+* **Delete** files and directories.
+
+
+### Key Commands & Concepts Covered
+
+This lab will introduce and reinforce the use of fundamental Linux commands for file system management, including:
+
+* `mkdir`: Make Directories
+* `touch`: Create Empty Files
+* `echo`: Output text (useful for putting content into files)
+* `cp`: Copy Files and Directories
+* `mv`: Move or Rename Files and Directories
+* `rm`: Remove Files
+* `rmdir`: Remove Empty Directories (or `rm -r` for non-empty)
+* `ls`: List Directory Contents
+
+---
+
+### Suggested Code Example & Explanation
+
+Below is a sequence of commands that demonstrates the core operations covered in this lab. You can combine these into a single Bash script or execute them step-by-step in your terminal.
+
+cd ~/Downloads
+chmod 400 labsuser.pem
+ssh -i labsuser.pem ec2-user@<public-ip>
+```bash
+#!/bin/bash
+
+# --- 1. Setup: Create a main project directory ---
+echo "--- Creating main project directory 'my_project' ---"
+mkdir my_project
+# Explanation: 'mkdir' creates a new directory.
+
+cd my_project
+# Explanation: 'cd' changes the current working directory to 'my_project'.
+
+# --- 2. Create a folder structure ---
+echo -e "\n--- Creating sub-folders: docs, src, data ---"
+mkdir -p docs src data
+# Explanation: 'mkdir -p' creates directories. '-p' ensures that parent directories
+# are created if they don't already exist (though not strictly needed here).
+
+# --- 3. Create files ---
+echo -e "\n--- Creating initial files ---"
+touch docs/report.txt
+# Explanation: 'touch' creates an empty file if it doesn't exist, or updates its timestamp.
+
+echo "print('Hello, World!')" > src/main.py
+# Explanation: 'echo' prints text, and '>' redirects that text into 'src/main.py',
+# creating the file if it doesn't exist, or overwriting it if it does.
+
+echo "id,name,value" > data/raw_input.csv
+echo "1,itemA,10" >> data/raw_input.csv
+# Explanation: '>' creates/overwrites, '>>' appends text to a file.
+
+touch README.md
+# Explanation: Creates an empty README file in the current directory (my_project).
+
+ls -R
+# Explanation: 'ls -R' lists the contents of directories recursively,
+# showing the entire structure created so far.
+
+# --- 4. Copy and move files and directories ---
+echo -e "\n--- Copying and moving files/directories ---"
+
+cp docs/report.txt data/
+# Explanation: 'cp' copies 'report.txt' from 'docs/' to 'data/'.
+
+mv src/main.py .
+# Explanation: 'mv' moves 'main.py' from 'src/' to the current directory ('.').
+# It also works for renaming files if the destination is a new filename in the same directory.
+
+mv data/raw_input.csv data/processed_data.csv
+# Explanation: 'mv' renames 'raw_input.csv' to 'processed_data.csv' within the 'data/' directory.
+
+ls -R
+# Explanation: Re-listing to show changes after copy and move operations.
+
+# --- 5. Delete files and directories ---
+echo -e "\n--- Deleting files and directories ---"
+
+rm README.md
+# Explanation: 'rm' removes a file.
+
+rmdir src
+# Explanation: 'rmdir' removes an EMPTY directory. If 'src' had content, this would fail.
+# (Alternatively, 'rm -r src' could be used to remove non-empty directories recursively).
+
+rm data/processed_data.csv
+# Explanation: Removing a specific file from the 'data' directory.
+
+ls -R
+# Explanation: Final listing to show the state after deletion operations.
+
+# --- Clean up (optional, for re-running the lab) ---
+cd ..
+echo -e "\n--- Cleaning up 'my_project' directory ---"
+rm -rf my_project
+# Explanation: 'cd ..' moves up one directory. 'rm -rf' forcefully removes
+# the 'my_project' directory and all its contents without prompting.
+# Use 'rm -rf' with extreme caution as it deletes permanently!
