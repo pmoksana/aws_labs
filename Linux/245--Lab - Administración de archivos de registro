@@ -1,0 +1,42 @@
+Managing Log Files
+
+Objectives
+Review the lastlog and secure log outputs of the Linux machinne 
+cd ~/Downloads
+chmod 400 labsuser.pem
+ssh -i labsuser.pem ec2-user@<public-ip>
+
+Task 2: Review secure log files
+In this task, you use common Linux tools to review the secure log files and use the lastlog Linux application to review the previous logins.
+
+To validate that you are in the companyA home folder, enter pwd and press Enter.
+   If you are not in this folder, enter cd companyA and press Enter. 
+
+To use the secure log file as a test, enter sudo less /tmp/log/secure and press Enter. It should look like the following:
+![Image shows the output of sudo less /tmp/log/secure lists the authentication failures.](images/tmp-log.jpg)
+
+*Figure: The list of errors and failures include the following information: where the user was trying to access from (IP address), if they failed authentication, and which port.*
+>**Note**
+>
+>Usually, the secure log file is located at **/var/log/secure**.  This lab presents a sample secure log file at **/tmp/log/secure**.
+To exit the program, enter q
+To view the last login times of all the users on the machine, enter sudo lastlog and press Enter. It should look like the following:
+![Image shows output of sudo lastlog command and displays a list of every user and their most recent log in date/time. ](images/last-log.jpg)
+
+*Figure: Examples of the users who last logged in were: root which shows as never logged in, bin never logged in, and daemon never logged in, etc. *
+    
+
+Additional challenge
+What information can you extract for some of your business purposes?
+
+ 
+
+Lab Complete 
+ Congratulations! You have completed the lab.
+
+Select End Lab at the top of this page and then select Yes to confirm that you want to end the lab.
+A panel will appear, indicating that "DELETE has been initiated... You may close this message box now."
+Select the X in the top right corner to close the panel.
+ 
+
+About the AWS component
