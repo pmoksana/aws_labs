@@ -1,0 +1,153 @@
+Managing Processes on Amazon Linux EC2
+
+This repository documents key tasks and commands for managing processes and scheduling repetitive tasks on an Amazon Linux EC2 instance, as explored in a practical lab environment.
+
+Objectives:
+Creating and managing log files for process listings.
+Monitoring system processes and performance using top.
+Establishing automated, repetitive tasks using cron jobs.
+
+Prerequisites:
+An Amazon EC2 instance (specifically Amazon Linux).
+SSH access configured for the EC2 instance (e.g., .pem key for macOS/Linux, .ppk key for Windows PuTTY).
+Basic understanding of Linux command line.
+Task 1: Connecting to the Amazon Linux EC2 Instance via SSH
+This task outlines the method to establish a secure shell connection to the EC2 instance, which is the primary way to interact with it for system administration.
+
+Function: Securely connect to the remote EC2 server to execute commands.
+
+Code (macOS/Linux Example):
+
+Bash
+
+# Navigate to the directory where your .pem key is downloaded
+cd ~/Downloads
+
+# Change permissions on the key for security
+chmod 400 labsuser.pem
+
+# Connect to the EC2 instance (replace <public-ip> with your instance's Public IP)
+ssh -i labsuser.pem ec2-user@<public-ip>
+Explanation:
+
+cd ~/Downloads: Changes the current directory to your Downloads folder, where the labsuser.pem key is typically saved.
+chmod 400 labsuser.pem: Sets read-only permissions for the owner of the key file. This is crucial for SSH security; SSH clients often refuse to use keys with more permissive settings.
+ssh -i labsuser.pem ec2-user@<public-ip>: Initiates the SSH connection.
+-i labsuser.pem: Specifies the identity file (private key) for authentication.
+ec2-user: The default username for Amazon Linux AMIs.
+<public-ip>: The public IPv4 address of your EC2 instance.
+Task 2: Creating a Process Log File
+This exercise focuses on capturing a snapshot of running processes and saving it to a filtered log file.
+
+Function: Generate a CSV file containing active system processes, excluding specific entries, and store it in a designated shared folder for auditing.
+
+Code:
+
+Bash
+
+# (Optional) Verify current directory - should be /home/ec2-user/companyA
+pwd
+
+# If not in the correct directory, navigate to it
+# cd companyA
+
+# Command to list processes, filter, and save to a CSV file
+sudo ps -aux | grep -v root | sudo tee SharedFolders/processes.csv
+
+# Validate the content of the created file
+cat SharedFolders/processes.csv
+Explanation:
+
+sudo ps -aux: Lists all running processes (-a for all users, -u for user/owner format, -x for processes without a controlling tty). sudo is used to ensure permissions to see all processes.
+| grep -v root: Pipes the output of ps -aux to grep. The -v option inverts the match, so it filters out any lines containing the word "root".
+| sudo tee SharedFolders/processes.csv: Pipes the filtered output to tee.
+tee: Reads from standard input and writes to both standard output (the terminal) and one or more files.
+SharedFolders/processes.csv: The target file where the process list is saved. sudo is again used with tee to ensure write permissions to the SharedFolders directory, which might be owned by root or require elevated privileges.
+Task 3: Listing Processes with top
+This task introduces top, a powerful command-line utility for real-time monitoring of system processes.
+
+Function: Display dynamic, real-time information about running processes, system performance, and resource utilization.
+
+Code:
+
+Bash
+
+# Run top to display active processes and system performance
+top
+
+# (While in top, observe system stats, e.g., 'Tasks' line)
+
+# Quit top
+q
+# Then press Enter
+
+# Display usage and version information for top
+top -hv
+Explanation:
+
+top: Launches an interactive full-screen display.
+It shows CPU usage, memory usage, swap space, and a list of processes sorted by CPU usage by default.
+It updates every few seconds, providing a dynamic view of system activity.
+Tasks: Provides a summary of processes: total, running, sleeping, stopped, and zombie.
+q: The standard key to exit the top command.
+top -hv: Displays help/usage information and the version of the top utility.
+Task 4: Creating a Cron Job for Auditing
+This exercise demonstrates how to schedule a repetitive task using cron, a time-based job scheduler in Unix-like operating systems. A crontab file is used to define these scheduled tasks.
+
+Function: Automate the creation of a filtered audit log file at a specified interval (e.g., hourly). This job will list all files, replace any .csv extensions with #####.csv, and redirect the output to a new file.
+
+Code:
+
+Bash
+
+# (Optional) Verify current directory - should be /home/ec2-user/companyA
+pwd
+
+# Open the crontab editor (using sudo to modify root's crontab or ensure permissions)
+sudo crontab -e
+
+# --- Inside the crontab editor (e.g., vi/vim) ---
+# Press 'i' to enter INSERT mode.
+# Enter the following lines:
+SHELL=/bin/bash
+PATH=/usr/bin:/bin:/usr/local/bin
+MAILTO=root
+0 * * * * ls -la $(find .) | sed -e 's/..csv/#####.csv/g' > /home/ec2-user/companyA/SharedFolders/filteredAudit.csv
+
+# Press 'ESC' to exit INSERT mode.
+# Type ':wq' and press Enter to save and quit.
+# --- End of crontab editor instructions ---
+
+# Validate that the cron job was successfully saved
+sudo crontab -l
+Explanation:
+
+sudo crontab -e: Opens the crontab file for the current user (or root if sudo is used) in the default text editor (often vi/vim).
+
+Crontab Environment Variables:
+
+SHELL=/bin/bash: Specifies the shell environment to use for executing the cron job.
+PATH=/usr/bin:/bin:/usr/local/bin: Defines the executable search path for commands run by the cron job. This is crucial for cron jobs to find commands like ls, find, sed, etc.
+MAILTO=root: Directs any output or errors from the cron job to the root user's mailbox (often system mail).
+Cron Job Entry (0 * * * * ...):
+0 * * * *: This is the schedule.
+0: Minute (0-59). Here, it means the job runs at the 0th minute of the hour.
+*: Hour (0-23). An asterisk means "every hour."
+*: Day of Month (1-31). Every day of the month.
+*: Month (1-12). Every month.
+*: Day of Week (0-7, where 0 and 7 are Sunday). Every day of the week.
+Combined: This job will run at the beginning of every hour (e.g., 01:00, 02:00, 03:00, etc., daily).
+ls -la $(find .):
+find .: Finds all files and directories in the current directory (.) and its subdirectories.
+$(...): Command substitution, meaning the output of find . is used as arguments for ls -la.
+ls -la: Lists files and directories in long format, including hidden files.
+| sed -e 's/..csv/#####.csv/g': Pipes the output to sed.
+sed -e 's/..csv/#####.csv/g': A sed command for stream editing.
+s: Substitute command.
+..csv: A regular expression matching any two characters followed by ".csv". This seems intended to match any filename ending in .csv but might be too broad (e.g., could match "test.csv"). A more robust regex for ".csv" would be \.csv. However, ..csv as provided is likely to match something like "abc.csv" or "12.csv". Given the lab context, it's likely a simplification.
+#####.csv: The replacement string.
+g: Global flag, replaces all occurrences on each line.
+> /home/ec2-user/companyA/SharedFolders/filteredAudit.csv: Redirects the standard output of the entire pipeline to the specified file, overwriting it each time the cron job runs.
+sudo crontab -l: Lists the currently installed crontab entries for the user (or root with sudo). This is used to verify that the cron job was saved correctly.
+
+
