@@ -23,7 +23,7 @@ Bash
 ssh -i labsuser.pem ec2-user@<public-ip>
 Task 2: Create an Alias for a Backup Operation
 This task demonstrates how to create a custom alias for a tar backup command, making complex operations simpler to execute.
-
+ 
 Function: Create a reusable shortcut (alias) for a tar command that compresses a specified directory or file into a gzipped archive, with verbose output.
 
 Usage Example: backup "fileToSaveTo.tar.gz" "pathToBackUp"
