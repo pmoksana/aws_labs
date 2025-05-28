@@ -1,0 +1,107 @@
+Linux Aliases and PATH Variable Management on Amazon Linux EC2
+This repository details practical Linux commands for enhancing command-line efficiency through aliases and understanding/modifying the system's PATH environment variable. These concepts are fundamental for streamlining workflows and managing executables in a Linux server environment.
+
+Objectives:
+Creating custom command aliases for complex or frequently used operations.
+Understanding the PATH environment variable and its role in command execution.
+Modifying the PATH variable to include custom executable directories.
+Prerequisites:
+An Amazon EC2 instance (specifically Amazon Linux).
+SSH access configured for the EC2 instance.
+Basic understanding of Linux command line.
+(Optional but recommended: Completion of previous labs setting up the CompanyA folder structure and hello.sh script).
+Task 1: (Implicit) Connect to the EC2 Instance
+(As in previous labs, the first step is always to establish an SSH connection.)
+
+Function: Securely connect to the remote EC2 server to execute commands.
+
+Code (macOS/Linux Example):
+
+Bash
+
+# Example: Connect to the EC2 instance using your .pem key
+ssh -i labsuser.pem ec2-user@<public-ip>
+Task 2: Create an Alias for a Backup Operation
+This task demonstrates how to create a custom alias for a tar backup command, making complex operations simpler to execute.
+
+Function: Create a reusable shortcut (alias) for a tar command that compresses a specified directory or file into a gzipped archive, with verbose output.
+
+Usage Example: backup "fileToSaveTo.tar.gz" "pathToBackUp"
+
+Code:
+
+Bash
+
+# Ensure you are in the user's home directory
+pwd # Expected output: /home/ec2-user/
+
+# Create the 'backup' alias
+alias backup='tar -cvzf '
+
+# Use the 'backup' alias to backup the 'CompanyA' folder
+backup backup_companyA.tar.gz CompanyA
+
+# Verify that the archive file was created
+ls
+Explanation of Commands and Concepts:
+
+alias <name>='<command>': Creates a temporary alias (valid for the current shell session).
+backup='tar -cvzf ': Defines an alias named backup. The single quotes are important to group the entire command string. Notice the space at the end, which allows the alias to seamlessly accept the next arguments on the command line.
+tar: (Tape Archiver) A powerful utility used to create or extract archives.
+-c: Create a new archive.
+-v: Verbose mode, lists files processed.
+-z: Compress the archive using gzip.
+-f: Specifies the archive filename. When used as tar -cvzf, the next argument is the archive name, and subsequent arguments are the files/directories to archive.
+backup backup_companyA.tar.gz CompanyA:
+backup: Invokes the defined alias.
+backup_companyA.tar.gz: This becomes the first argument passed to the tar command after the alias (the archive file name).
+CompanyA: This becomes the second argument passed to the tar command (the path to back up).
+ls: Lists files in the current directory to confirm the creation of backup_companyA.tar.gz.
+Task 3: Explore and Update the PATH Environment Variable
+This task delves into the PATH environment variable, explaining its significance in how the shell finds and executes commands, and demonstrates how to extend it to include custom executable directories.
+
+Function:
+
+Display the current value of the PATH variable.
+Illustrate why scripts or executables outside standard PATH directories require specific execution methods.
+Modify the PATH variable to include a custom directory, allowing direct execution of scripts from that directory.
+Code:
+
+Bash
+
+# Navigate to a directory containing a custom executable (e.g., hello.sh)
+cd /home/ec2-user/CompanyA/bin
+
+# Attempt to run the script using its relative path (from current directory)
+./hello.sh # Expected: hello ec2-user
+
+# Navigate to the parent directory
+cd .. # Now in /home/ec2-user/CompanyA
+
+# Attempt to run the script using its relative path (from parent directory)
+./bin/hello.sh # Expected: hello ec2-user
+
+# Attempt to run the script by just its name (will initially fail)
+hello.sh # Expected: bash: hello.sh: command not found
+
+# Display the current value of the PATH variable
+echo $PATH # Expected: list of directories separated by colons
+
+# Add the custom directory (/home/ec2-user/CompanyA/bin) to the PATH
+PATH=$PATH:/home/ec2-user/CompanyA/bin
+
+# Try to run the script by just its name again (should now succeed)
+hello.sh # Expected: hello ec2-user
+Explanation of Commands and Concepts:
+
+echo $PATH: Displays the value of the PATH environment variable. This variable contains a colon-separated list of directories where the shell looks for executable commands.
+./hello.sh: Executes hello.sh located in the current directory (.). The ./ explicitly tells the shell to look in the current directory, regardless of PATH.
+./bin/hello.sh: Executes hello.sh located in the bin subdirectory relative to the current directory.
+hello.sh (without ./): When a command is typed without a path, the shell searches for an executable file with that name in the directories listed in the PATH variable, in order. If it's not found in any of those directories, a "command not found" error occurs.
+PATH=$PATH:/home/ec2-user/CompanyA/bin: This command modifies the PATH variable.
+$PATH: Refers to the current value of the PATH variable.
+:: The separator between directory entries in PATH.
+/home/ec2-user/CompanyA/bin: The new directory being added to the PATH.
+This effectively appends the CompanyA/bin directory to the existing list of directories where the shell looks for commands.
+After modifying PATH, running hello.sh directly works because the shell now finds hello.sh in the newly added /home/ec2-user/CompanyA/bin directory within the PATH list.
+Note: Changes to the PATH environment variable made this way are typically temporary, lasting only for the current shell session. For permanent changes, it needs to be added to shell configuration files like .bashrc or .profile.
